@@ -38,11 +38,13 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Publish sane-fmt to the AUR
-        uses: guumaster/aur-publish-docker-action@v1
+      - name: Publish to the AUR
+        uses: KSXGitHub/github-actions-deploy-aur@master
         with:
           pkgname: appimage-builder
           pkgbuild: ./ci/arch/PKGBUILD
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update AUR package
+          ssh_keyscan_types: rsa,dsa,ecdsa,ed25519
