@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+    branches: [ release_arch_package ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.13
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+          if [ -f Gopkg.toml ]; then
+              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+              dep ensure
+          fi
+
+      - name: Build
+        run: go build -o ./dist/app -v ./app
+
+  publish_aur_package:
+    name: Publish AUR package
+    needs:
+      - build
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish sane-fmt to the AUR
+        uses: guumaster/aur-publish-docker-action@v1
+        with:
+          pkgname: appimage-builder
+          pkgbuild: ./ci/arch/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
