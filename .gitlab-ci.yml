@@ -11,7 +11,7 @@ build:
     expire_in: 1 year
 
 pack:debian:
-  image: debian
+  image: ubuntu
   stage: test
   dependencies:
     - build
