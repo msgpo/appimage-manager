@@ -3,8 +3,22 @@ build:
   script:
     - go get -v -t -d ./...
     - go build -o ./dist/app -v ./app
-    - mv ./dist/app ./dist/appimage-manager-$(git describe)
+    - cp ./dist/app ./dist/appimage-manager-$(git describe)
   artifacts:
     paths:
       - ./dist/appimage-manager*
+    expire_in: 1 year
+
+pack:debian:
+  image: debian
+  dependencies:
+    - build
+  before_script:
+    - apt-get update -y
+    - apt-get install -y checkinstall
+  script:
+    - checkinstall --install=no -y --type=rpm --pkgname=appimage-manager --pkgversion=$(git describe) --backup=no --maintainer=contact@azubieta.net --pkglicense=MIT --pkgsource=$PWD/app
+  artifacts:
+    paths:
+      - "*.deb"
     expire_in: 1 year
